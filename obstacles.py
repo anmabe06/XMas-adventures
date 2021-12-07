@@ -1,8 +1,8 @@
-class top_obstacle():
+class Top_obstacle():
     pass
 
-class bottom_obstacle():
+class Bottom_obstacle():
     pass
 
-class coin():
+class Coin():
     pass
