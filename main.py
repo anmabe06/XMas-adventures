@@ -4,23 +4,27 @@ from Obstacles import Top_obstacle, Bottom_obstacle, Coin
 
 def move():
     dummie = pygame.key.get_pressed()
-    if dummie[pygame.K_UP] and user.y - speed > 0:
+    if dummie[pygame.K_UP] and user.y - speed*2 > 0:
         user.y -= speed * 2
     elif user.y + speed <= screen_height - user.height:
-        user.y += speed
-    
+        if user.y > 13.0 or not dummie[pygame.K_UP]:
+            user.y += speed
 
 def load_window():
     screen.blit(background_image, (0,0))
     screen.blit(user_character, (user.x, user.y))
     pygame.display.update()
 
-def game(run):
-    while run:
+def isTerminal():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            return True
+    #Colision
+    return False
+
+def game():
+    while not isTerminal():
         clock.tick(fps)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
         
         move()
         load_window()
@@ -45,4 +49,4 @@ if __name__ == "__main__":
     fps = 60
     speed = 5
 
-    game(True)
+    game()
