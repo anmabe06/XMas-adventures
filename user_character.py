@@ -5,7 +5,7 @@ class Character():
         if(character == "melchor"):
             self.character = "melchor"
             self.character_image = "assets/images/melchor.png"
-            self.width, self.height = 122, 147
+            self.width, self.height = 140, 140
 
         elif(character == "gaspar"):
             self.character = "gaspar"
