@@ -1,6 +1,9 @@
+from global_variables import *
+
 class Character():
     def __init__(self, username, character):
         self.username = username
+        self.lifes = 5
 
         if(character == "melchor"):
             self.character = "melchor"
@@ -24,4 +27,6 @@ class Character():
         
         self.x = 25
         self.y = 700/2 - self.height
+        self.initial_x = self.x
+        self.initial_y = self.y
             
