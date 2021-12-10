@@ -22,7 +22,7 @@ def isTerminal():
 def islifeLost():
     #Colision with object
     #Colision with floor or ceeling
-    if user.y < 13.0 or user.y == screen_height-user.height:
+    if user.y == screen_height-user.height:
         user.lifes -= 1
         if user.lifes == 0:
             return True
@@ -44,16 +44,16 @@ def create_obstacles():
         else:
             building_height = "2"
 
-    sentinel_helicopter=obstacles_in_scene[0]
+    #sentinel_helicopter=obstacles_in_scene[0]
     #sentinel_present=obstacles_in_scene[1] if showPresent
-    sentinel_building=obstacles_in_scene[2]
+    #sentinel_building=obstacles_in_scene[2]
 
-    sentinel_helicopter = str(sentinel_helicopter)
+    #sentinel_helicopter = str(sentinel_helicopter)
     #sentinel_present = str(sentinel_present)
-    sentinel_building = str(sentinel_building)
+    #sentinel_building = str(sentinel_building)
 
     obstacles_in_scene[0].append(Helicopter(helicopter_height))
-    obstacles_in_scene[1].append(Building(helicopter_height))
+    obstacles_in_scene[2].append(Building(building_height))
 
 
         
@@ -71,7 +71,7 @@ def move_scene():
     #Move obstacles
     if len(obstacles_in_scene[0]) > 0:
         for helicopter in obstacles_in_scene[0]:
-            helicopter.x += obstacle_speed
+            helicopter.x -= obstacle_speed
     
     if len(obstacles_in_scene[1]) > 0:
         for present in obstacles_in_scene[1]:
@@ -80,7 +80,7 @@ def move_scene():
     
     if len(obstacles_in_scene[2]) > 0:
         for building in obstacles_in_scene[2]:
-            building.x += obstacle_speed
+            building.x -= obstacle_speed
 
 
 def load_window():
@@ -116,7 +116,7 @@ def game():
         
         current_obstacle_frame_separation += 1
         move()
-        #move_scene()
+        move_scene()
         islifelost_var = islifeLost()
         load_window()
         
