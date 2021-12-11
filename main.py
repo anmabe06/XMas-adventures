@@ -5,8 +5,20 @@ from Obstacles import Helicopter, Building, Present
 import time
 import random
 
-#TODO: Make obtacle logic
-#TODO: Make background music track
+#T_ODO: Change player jump
+#T_ODO: Add score and lifes text
+#TODO: Add hitboxes to obstacles
+#TODO: Make presents' code
+#TODO: Add background music
+#TODO: Add hop sound effect on movement
+#TODO: Make respawn animation
+#TODO: Make helicopter animation
+#TODO: Add lost screen to quit game or redirect to main menu
+#TODO: Main menu:
+#       - Game name
+#       - Background animation
+#       - Change character (selector)
+#       - Set name
 
 def isTerminal():
     for event in pygame.event.get():
@@ -22,7 +34,7 @@ def isTerminal():
 def islifeLost():
     #Colision with object
     #Colision with floor or ceeling
-    if user.y == screen_height-user.height:
+    if user.y >= screen_height-user.height:
         user.lifes -= 1
         if user.lifes == 0:
             return True
@@ -56,15 +68,28 @@ def create_obstacles():
     obstacles_in_scene[2].append(Building(building_height))
 
 
-        
-
 def move():
+    global sentinelSpeed
+
     dummie = pygame.key.get_pressed()
-    if dummie[pygame.K_UP] and user.y - speed*2 > 0:
-        user.y -= speed * 2
-    elif user.y + speed <= screen_height - user.height:
-        if user.y > 13.0 or not dummie[pygame.K_UP]:
-            user.y += speed
+    if dummie[pygame.K_UP] and user.jumping_animation_duration_timer == 0:
+        user.y -= user.jump_speed
+        user.jumping_animation_duration_timer = user.jumping_animation_duration
+        #sentinelSpeed = user.speed
+    
+    elif user.jumping_animation_duration_timer > 0:
+        
+        if user.jumping_animation_duration_timer >= user.jumping_animation_duration_halved:
+            user.y -= user.speed / fps / 4*3
+        else:
+            #Code to make a slow fall animation
+            user.y += user.speed / fps / 4
+            pass
+        
+        user.jumping_animation_duration_timer -= 1
+    
+    else:
+        user.y += gravity
 
 
 def move_scene():
@@ -86,6 +111,8 @@ def move_scene():
 def load_window():
     screen.blit(background_image, (0,0))
     screen.blit(user_character, (user.x, user.y))
+    screen.blit(lifes_font, (screen_width - 200, 20))
+    screen.blit(score_font, (screen_width - 200, 90))
     
     if len(obstacles_in_scene[0]) > 0:
         for helicopter in obstacles_in_scene[0]:
@@ -106,9 +133,13 @@ def load_window():
 def game():
     global current_obstacle_frame_separation
     global obstacle_frame_separation
+    global lifes_font, score_font
     #time.sleep(2)
+
     while not isTerminal():
         clock.tick(fps)
+        lifes_font = font.render(f'Lifes: {user.lifes}', True, (255,255,255))
+        score_font = font.render(f'Score: {user.score}', True, (255,255,255))
         
         if current_obstacle_frame_separation == obstacle_frame_separation:
             create_obstacles()
@@ -122,14 +153,14 @@ def game():
         
         if islifelost_var and user.lifes != 0:
             time.sleep(1)
-        
-        print(len(obstacles_in_scene))
 
     pygame.quit()
 
 
 if __name__ == "__main__":
     pygame.init()
+    pygame.font.init()
+    font = pygame.font.SysFont(None, 50)
 
     #Window adjustments
     pygame.display.set_caption("XMAS ADVENTURES")
