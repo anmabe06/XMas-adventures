@@ -3,10 +3,13 @@ from global_variables import *
 class Character():
     def __init__(self, username, character):
         self.username = username
-        self.lifes = 5
+        self.lifes = 1
         self.jump_speed = 20
         self.speed = 500
         self.score = 0
+        self.rect = None
+
+        self.hasColided = False
 
         self.jumping_animation_duration = fps/2
         self.jumping_animation_duration_halved = fps/4
@@ -36,3 +39,11 @@ class Character():
         self.y = 700/2 - self.height
         self.initial_x = self.x
         self.initial_y = self.y
+    
+    
+    def respawnAnimation(self):
+        pass
+
+
+    def blinkAnimation(self):
+        pass

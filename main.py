@@ -1,3 +1,4 @@
+from pygame import image
 from global_variables import *
 import pygame
 from User_character import Character
@@ -20,29 +21,64 @@ import random
 #       - Change character (selector)
 #       - Set name
 
-def isTerminal():
+
+def isQuit():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            return True
+            pygame.quit()
+
+
+def isDeadFromCollision():
+    sentinel = False
+    if len(obstacles_in_scene[0]) > 0:
+        for helicopter in obstacles_in_scene[0]:
+            # print("Helicopter: ", helicopter.rect.x, helicopter.rect.y, " | User: ", user.rect.x, user.rect.y)
+            if user.rect.colliderect(helicopter.rect):
+                sentinel = True
     
-    if user.lifes <= 0:
+    if len(obstacles_in_scene[1]) > 0:
+        for present in obstacles_in_scene[1]:
+            #screen.blit(present, (present.x, present.y))
+            #sentinel = True
+            pass
+    
+    if len(obstacles_in_scene[2]) > 0:
+        for building in obstacles_in_scene[2]:
+            #print("Building: ", building.rect.x, building.rect.y, " | User: ", user.rect.x, user.rect.y)
+            if user.rect.colliderect(building.rect):
+                sentinel = True
+    
+    user.hasColided = sentinel
+    return sentinel
+
+
+def isDeadFromFloorBang():
+    if user.y >= screen_height-user.height:
         return True
     
     return False
 
 
 def islifeLost():
-    #Colision with object
-    #Colision with floor or ceeling
-    if user.y >= screen_height-user.height:
-        user.lifes -= 1
-        if user.lifes == 0:
-            return True
-        time.sleep(1)
-        user.x, user.y = user.initial_x, user.initial_y
-        return True
+    isDeadFromFloorBang_value = isDeadFromFloorBang()
+    isDeadFromCollision_value = isDeadFromCollision()
     
-    return False
+    if isDeadFromFloorBang_value:
+        if user.lifes > 0:
+            user.respawnAnimation
+            user.lifes -= 1
+            #TO REMOVE AFTER ANIMATION COMPLETED
+            time.sleep(1)
+            user.x, user.y = user.initial_x, user.initial_y
+            user.rect.x, user.rect.y = user.initial_x, user.initial_y
+            #######
+        print("isDeadFromFloorBang")
+
+    elif isDeadFromCollision_value:
+        user.blinkAnimation
+        print("isDeadFromCollision")
+
+    return isDeadFromFloorBang_value and isDeadFromCollision_value
 
 
 def create_obstacles():
@@ -52,9 +88,15 @@ def create_obstacles():
 
     if helicopter_height == "3" and building_height == "3":
         if random.randint(0,1) == 0:
-            helicopter_height = "2"
+            helicopter_height = "1"
         else:
-            building_height = "2"
+            building_height = "1"
+
+    elif helicopter_height == "3" and building_height == "2":
+        building_height = "1"
+
+    elif helicopter_height == "2" and building_height == "3":
+        helicopter_height = "1"
 
     #sentinel_helicopter=obstacles_in_scene[0]
     #sentinel_present=obstacles_in_scene[1] if showPresent
@@ -64,8 +106,8 @@ def create_obstacles():
     #sentinel_present = str(sentinel_present)
     #sentinel_building = str(sentinel_building)
 
-    obstacles_in_scene[0].append(Helicopter(helicopter_height))
-    obstacles_in_scene[2].append(Building(building_height))
+    obstacles_in_scene[0].append(Helicopter(helicopter_height, pygame.Rect(screen_width, 0, 100, heightConverter[helicopter_height])))
+    obstacles_in_scene[2].append(Building(building_height, pygame.Rect(screen_width, screen_height - heightConverter[building_height], 100, heightConverter[building_height])))
 
 
 def move():
@@ -74,6 +116,10 @@ def move():
     dummie = pygame.key.get_pressed()
     if dummie[pygame.K_UP] and user.jumping_animation_duration_timer == 0:
         user.y -= user.jump_speed
+        user.rect.y -= user.jump_speed
+        if user.y < 10:
+            user.y = 10
+            user.rect.y = 10
         user.jumping_animation_duration_timer = user.jumping_animation_duration
         #sentinelSpeed = user.speed
     
@@ -81,21 +127,31 @@ def move():
         
         if user.jumping_animation_duration_timer >= user.jumping_animation_duration_halved:
             user.y -= user.speed / fps / 4*3
+            user.rect.y -= user.speed / fps / 4*3
+            if user.y < 10:
+                user.y = 10
+                user.rect.y = 10
         else:
             #Code to make a slow fall animation
             user.y += user.speed / fps / 4
+            user.rect.y = user.speed / fps / 4
             pass
         
         user.jumping_animation_duration_timer -= 1
     
     else:
         user.y += gravity
+        user.rect.y += gravity
+
+    user.rect.y = user.y
+    #print(user.rect.y, user.y)
 
 
 def move_scene():
     #Move obstacles
     if len(obstacles_in_scene[0]) > 0:
         for helicopter in obstacles_in_scene[0]:
+            helicopter.rect.x -= obstacle_speed
             helicopter.x -= obstacle_speed
     
     if len(obstacles_in_scene[1]) > 0:
@@ -105,6 +161,7 @@ def move_scene():
     
     if len(obstacles_in_scene[2]) > 0:
         for building in obstacles_in_scene[2]:
+            building.rect.x -= obstacle_speed
             building.x -= obstacle_speed
 
 
@@ -130,13 +187,22 @@ def load_window():
     pygame.display.update()
 
 
+def showEndScreen():
+    screen.blit(pygame.image.load("assets/images/end_screen.png"), (0,0))
+    screen.blit(game_over_font, (screen_width/2-400,screen_height/2-100))
+    
+    pygame.display.update()
+    while True:
+        isQuit()
+
+
 def game():
     global current_obstacle_frame_separation
     global obstacle_frame_separation
     global lifes_font, score_font
     #time.sleep(2)
 
-    while not isTerminal():
+    while user.lifes > 0:
         clock.tick(fps)
         lifes_font = font.render(f'Lifes: {user.lifes}', True, (255,255,255))
         score_font = font.render(f'Score: {user.score}', True, (255,255,255))
@@ -154,13 +220,17 @@ def game():
         if islifelost_var and user.lifes != 0:
             time.sleep(1)
 
-    pygame.quit()
+        isQuit()
+    
+    showEndScreen()
 
 
 if __name__ == "__main__":
     pygame.init()
     pygame.font.init()
     font = pygame.font.SysFont(None, 50)
+    font2 = pygame.font.SysFont(None, 200)
+    game_over_font = font2.render('GAME OVER', True, (255,0,0))
 
     #Window adjustments
     pygame.display.set_caption("XMAS ADVENTURES")
@@ -168,8 +238,8 @@ if __name__ == "__main__":
 
     #Set scene
     user = Character("anmabe", "melchor")
+    user.rect = pygame.Rect(user.x, user.y, user.width, user.height)
     user_character = pygame.image.load(user.character_image)
-    player = pygame.Rect(user.x, user.y, user.width, user.height)
     background_image = pygame.image.load('assets/images/background.jpg')
 
     clock = pygame.time.Clock()

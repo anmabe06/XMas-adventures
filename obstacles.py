@@ -2,7 +2,8 @@ from global_variables import *
 import pygame
 
 class Helicopter():
-    def __init__(self, height):
+    def __init__(self, height, rect):
+        self.rect = rect
         self.__collision_sound = pygame.mixer.Sound("assets/music/crash_sound_effect.mp3")
         self.x = screen_width
         self.y = 0
@@ -29,7 +30,8 @@ class Helicopter():
 
 
 class Building():
-    def __init__(self, height):
+    def __init__(self, height, rect):
+        self.rect = rect
         self.__collision_sound = pygame.mixer.Sound("assets/music/crash_sound_effect.mp3")
         self.width = 100
 
