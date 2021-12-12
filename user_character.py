@@ -3,7 +3,7 @@ from global_variables import *
 class Character():
     def __init__(self, username, character):
         self.username = username
-        self.lifes = 1
+        self.lifes = 5
         self.jump_speed = 20
         self.speed = 500
         self.score = 0
