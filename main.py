@@ -48,8 +48,14 @@ def isDeadFromCollision():
             if user.rect.colliderect(building.rect):
                 sentinel = True
     
-    user.hasColided = sentinel
-    return sentinel
+    if user.hasColided == True and sentinel == True:
+        pass
+    elif user.hasColided == True and sentinel == False:
+        user.hasColided = False
+        return sentinel
+    elif user.hasColided == False and sentinel == True:
+        user.hasColided = True
+        return sentinel
 
 
 def isDeadFromFloorBang():
@@ -75,6 +81,7 @@ def islifeLost():
         print("isDeadFromFloorBang")
 
     elif isDeadFromCollision_value:
+        user.lifes -= 1
         user.blinkAnimation
         print("isDeadFromCollision")
 
