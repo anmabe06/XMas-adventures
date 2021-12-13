@@ -46,7 +46,7 @@ class Building():
             self.height = 200
             self.image =  "assets/images/building_three.png"
         elif height == "3":
-            self.height = 350
+            self.height = 300
             self.image =  "assets/images/building_four.png"
 
         self.x = screen_width
@@ -59,13 +59,16 @@ class Building():
 
 
 class Present():
-    def __init__(self):
-        self.__present_sound = pygame.mixer.Sound("assets/music/get_present_sound_effect.mp3")
+    def __init__(self, y_pos, rect):
+        #self.__present_sound = pygame.mixer.Sound("assets/music/get_present_sound_effect.mp3")
         self.image =  "assets/images/present.png"
+        self.rect = rect
         self.width = 100
         self.height = 100
         self.x = screen_width
-        self.y = screen_height - self.height/2
+        self.y = y_pos
+        self.present_obstacle = pygame.image.load(self.image)
+        self.showImage = True
     
-    def play_sound(self):
-        pygame.mixer.Sound.play(self.__present_sound)
+    #def play_sound(self):
+       # pygame.mixer.Sound.play(self.__present_sound)

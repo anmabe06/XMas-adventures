@@ -8,7 +8,7 @@ import random
 
 #T_ODO: Change player jump
 #T_ODO: Add score and lifes text
-#TODO: Add hitboxes to obstacles
+#T_ODO: Add hitboxes to obstacles
 #TODO: Make presents' code
 #TODO: Add background music
 #TODO: Add hop sound effect on movement
@@ -36,12 +36,6 @@ def isDeadFromCollision():
             if user.rect.colliderect(helicopter.rect):
                 sentinel = True
     
-    if len(obstacles_in_scene[1]) > 0:
-        for present in obstacles_in_scene[1]:
-            #screen.blit(present, (present.x, present.y))
-            #sentinel = True
-            pass
-    
     if len(obstacles_in_scene[2]) > 0:
         for building in obstacles_in_scene[2]:
             #print("Building: ", building.rect.x, building.rect.y, " | User: ", user.rect.x, user.rect.y)
@@ -58,6 +52,16 @@ def isDeadFromCollision():
         return sentinel
 
 
+def hasObtainedPoints():
+    if len(obstacles_in_scene[1]) > 0:
+        for present in obstacles_in_scene[1]:
+            if user.rect.colliderect(present.rect):
+                user.score += 1
+                present.showImage = False
+    
+    return True
+
+
 def isDeadFromFloorBang():
     if user.y >= screen_height-user.height:
         return True
@@ -66,6 +70,7 @@ def isDeadFromFloorBang():
 
 
 def islifeLost():
+    global lifeLost_value
     isDeadFromFloorBang_value = isDeadFromFloorBang()
     isDeadFromCollision_value = isDeadFromCollision()
     
@@ -73,6 +78,7 @@ def islifeLost():
         if user.lifes > 0:
             user.respawnAnimation
             user.lifes -= 1
+            lifeLost_value = True
             #TO REMOVE AFTER ANIMATION COMPLETED
             time.sleep(1)
             user.x, user.y = user.initial_x, user.initial_y
@@ -82,6 +88,7 @@ def islifeLost():
 
     elif isDeadFromCollision_value:
         user.lifes -= 1
+        lifeLost_value = True
         user.blinkAnimation
         print("isDeadFromCollision")
 
@@ -91,7 +98,7 @@ def islifeLost():
 def create_obstacles():
     helicopter_height = str(random.randint(0,3))
     building_height = str(random.randint(0,3))
-    #showPresent = True if random.randint(0,5) == 3 else False
+    showPresent = True if random.randint(0,10) == 3 else False
 
     if helicopter_height == "3" and building_height == "3":
         if random.randint(0,1) == 0:
@@ -105,6 +112,8 @@ def create_obstacles():
     elif helicopter_height == "2" and building_height == "3":
         helicopter_height = "1"
 
+    present_y_position = (heightConverter[helicopter_height] + (screen_height - heightConverter[building_height])) / 2 - 100
+
     #sentinel_helicopter=obstacles_in_scene[0]
     #sentinel_present=obstacles_in_scene[1] if showPresent
     #sentinel_building=obstacles_in_scene[2]
@@ -115,6 +124,8 @@ def create_obstacles():
 
     obstacles_in_scene[0].append(Helicopter(helicopter_height, pygame.Rect(screen_width, 0, 100, heightConverter[helicopter_height])))
     obstacles_in_scene[2].append(Building(building_height, pygame.Rect(screen_width, screen_height - heightConverter[building_height], 100, heightConverter[building_height])))
+    #if showPresent:
+    obstacles_in_scene[1].append(Present(present_y_position, pygame.Rect(screen_width, present_y_position,  100, 100)))
 
 
 def move():
@@ -163,8 +174,8 @@ def move_scene():
     
     if len(obstacles_in_scene[1]) > 0:
         for present in obstacles_in_scene[1]:
-            #screen.blit(present, (present.x, present.y))
-            pass
+            present.rect.x -= obstacle_speed
+            present.x -= obstacle_speed
     
     if len(obstacles_in_scene[2]) > 0:
         for building in obstacles_in_scene[2]:
@@ -173,10 +184,15 @@ def move_scene():
 
 
 def load_window():
+    global lifeLost_value
     screen.blit(background_image, (0,0))
     screen.blit(user_character, (user.x, user.y))
     screen.blit(lifes_font, (screen_width - 200, 20))
     screen.blit(score_font, (screen_width - 200, 90))
+    if lifeLost_value:
+        screen.blit(pygame.image.load("assets/images/end_screen.png"), (0,0))
+        lifeLost_value = False
+    #screen.blit(pygame.image.load("assets/images/end_screen.png"), (0,0))
     
     if len(obstacles_in_scene[0]) > 0:
         for helicopter in obstacles_in_scene[0]:
@@ -184,8 +200,8 @@ def load_window():
     
     if len(obstacles_in_scene[1]) > 0:
         for present in obstacles_in_scene[1]:
-            #screen.blit(present, (present.x, present.y))
-            pass
+            if present.showImage:
+                screen.blit(present.present_obstacle, (present.x, present.y))
     
     if len(obstacles_in_scene[2]) > 0:
         for building in obstacles_in_scene[2]:
@@ -195,6 +211,8 @@ def load_window():
 
 
 def showEndScreen():
+    lifes_font = font.render('Lifes: 0', True, (255,255,255))
+    screen.blit(lifes_font, (screen_width - 200, 20))
     screen.blit(pygame.image.load("assets/images/end_screen.png"), (0,0))
     screen.blit(game_over_font, (screen_width/2-400,screen_height/2-100))
     
@@ -223,6 +241,7 @@ def game():
         move_scene()
         islifelost_var = islifeLost()
         load_window()
+        hasObtainedPoints()
         
         if islifelost_var and user.lifes != 0:
             time.sleep(1)

@@ -18,9 +18,11 @@ obstacle_frame_separation = current_obstacle_frame_separation = 300
 #Will contain three lists: helicopters, presents, buildings
 obstacles_in_scene = [[], [], []]
 
+lifeLost_value = False
+
 heightConverter = {
     "0": 100,
     "1": 150,
     "2": 200,
-    "3": 350
+    "3": 300
 }
